@@ -58,4 +58,31 @@ public class BookstoreTest {
         Assert.assertEquals(statusCode, 201, "Status code is not 201");
         Assert.assertTrue(responseBody.contains("userID"), "ResponseBody does not contain userId");
     }
+    @Test
+    public void incorrectPaasword(){
+        RestAssured.useRelaxedHTTPSValidation();
+        RestAssured.baseURI = "https://bookstore.toolsqa.com/Account/v1/";
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("userName", "meg1")
+                .put("password", "A123123@");
+
+        Response response = given()
+                .contentType("application/json")
+                .body(requestBody.toString())
+                .when()
+                .post("User")
+                .then()
+                .extract().response();
+
+        int statusCode = response.getStatusCode();
+        System.out.println("Status Code: " + statusCode);
+
+        String message = response.jsonPath().getString("message");
+        System.out.println("message: " + message);
+
+        String expectedMessage = "Passwords must have at least one non alphanumeric character, one digit ('0'-'9'), one uppercase ('A'-'Z'), one lowercase ('a'-'z'), one special character and Password must be eight characters or longer.";
+
+        Assert.assertEquals(statusCode, 400, "Status code is not 400");
+        Assert.assertEquals(message, expectedMessage, "Error message is incorrect");
+    }
 }
